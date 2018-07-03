@@ -8,10 +8,10 @@ class PreFilling {
 
 
     static run(){
-        this.FillColorList();
+        this.fillColorList();
     }
 
-    FillColorList(){
+    static fillColorList(){
         let colors =    [
                             'blue',
                             'red'
@@ -24,7 +24,7 @@ class PreFilling {
         });
     }
 
-    CandyList(){
+    static fillCandyList(){
         let candies =   [
                             ['chuppachups', 16.2, 9.4, 8.6, 11.3],
                             ['dragibus', 10.2, 9.5, 8.7, 18.3],
