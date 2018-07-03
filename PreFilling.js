@@ -8,10 +8,10 @@ class PreFilling {
 
 
     static run(){
-        this.ColorList();
+        this.FillColorList();
     }
 
-    ColorList(){
+    FillColorList(){
         let colors =    [
                             'blue',
                             'red'
