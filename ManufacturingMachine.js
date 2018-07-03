@@ -1,8 +1,6 @@
 class ManufacturingMachine {
-    constructor(manufacturingMachineID = null){
-        if(manufacturingMachineID != null){
+    constructor(manufacturingMachineID){
             this.manufacturingMachineID = manufacturingMachineID;
-        }
     }
 }
 
