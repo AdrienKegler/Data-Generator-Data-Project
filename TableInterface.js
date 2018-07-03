@@ -1,48 +1,57 @@
 const connectionString = {
-    user          : "C##PROJETDATA",
-    password      : "Oracle123",
-    connectString : "192.168.56.11/orcl"
+    user: "C##PROJETDATA",
+    password: "Oracle123",
+    connectString: "192.168.56.11/orcl"
 };
 
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 
-class TableInterface{
+class TableInterface {
 
-    constructor(){};
+    constructor() {
+    };
 
-    fetchWholeTable(tableName){
+
+    static fetchWholeTable(tableName) {
+        let arrayDataSet = null;
+        let query = "SELECT * FROM " + tableName;
+
         oracledb.getConnection(
             connectionString,
-            function(err, connection) {
+            function (err, connection) {
                 connection.execute(
-                    "SELECT * FROM " + tableName,
-                    [],
-                    {resultSet: true},
+                    query,
+                    [], // no bind variables
+                    {resultSet: true}, // return a ResultSet.  Default is false
                     function (err, result) {
                         if (err) {
-                            console.log(err)
+                            console.error(err.message);
+                            doRelease(connection);
+                            return;
                         }
-                        this.fetchOneRowFromRS(connection, result.resultSet);
+                        TableInterface.fetchOneRowFromRS(connection, result.resultSet);
                     }
                 )
-        });
+            }
+        );
+        return arrayDataSet;
     }
 
-    insertRow(row){
+    static insertRow(row) {
 
         let query = `INSERT INTO ` + row.constructor.name + ' (';
 
-        for(let propertyName in row){
+        for (let propertyName in row) {
             query = query + propertyName + ', ';
         }
 
-        query = query.slice(0, - 2) + ") VALUES (";
+        query = query.slice(0, -2) + ") VALUES (";
 
 
-        for(let index in row) {
+        for (let index in row) {
             let attr = row[index];
-            switch(typeof attr){
+            switch (typeof attr) {
                 case 'number':
                     query = query + attr + ", ";
                     break;
@@ -50,6 +59,7 @@ class TableInterface{
                     query = query + "'" + attr + "', ";
                     break;
                 case 'undefined':
+                case 'object':
                     query = query + "'', ";
                     break;
                 default:
@@ -58,13 +68,13 @@ class TableInterface{
             }
         }
 
-        query = query.slice(0, - 2) + ")";
+        query = query.slice(0, -2) + ")";
 
         console.log(query);
 
         oracledb.getConnection(
             connectionString,
-            function(err, connection) {
+            function (err, connection) {
                 connection.execute(
                     query,
                     [],
@@ -77,20 +87,77 @@ class TableInterface{
     }
 
 
-    fetchOneRowFromRS(connection, resultSet) {
-        resultSet.getRow( // get one row
-        function (err, row) {
-            if (err) {
-            // close the Result Set and release the connection
-            } else if (!row) { // no rows, or no more rows
-            // close the Result Set and release the connection
+    static updateRow(row) {
+
+        let query = `UPDATE ` + row.constructor.name + ' SET ';
+
+        let idFieldName = null;
+
+        for (let index in row) {
+            if (index.substr(index.length - 2).toUpperCase() !== 'ID') {
+                let attr = row[index];
+                query = query + " " + index + " = '" + attr + "',";
             } else {
-                console.log(row);
-                this.fetchOneRowFromRS(connection, resultSet);  // get next row
+                idFieldName = index;
+                console.log(index);
             }
-        });
+        }
+
+        query = query.slice(0, -1) + " WHERE " + idFieldName + " = " + row[idFieldName];
+
+        console.log(query);
+
+        oracledb.getConnection(
+            connectionString,
+            function (err, connection) {
+                connection.execute(
+                    query,
+                    [],
+                    {autoCommit: true},
+                    function (err, result) {
+                        console.log(result);
+                    });
+            }
+        );
     }
 
-};
+    static fetchOneRowFromRS(connection, resultSet) {
+        resultSet.getRow( // get one row
+            function (err, row) {
+                if (err) {
+                    console.error(err.message);
+                    TableInterface.doClose(connection, resultSet); // always close the ResultSet
+                } else if (!row) { // no rows, or no more rows
+                    TableInterface.doClose(connection, resultSet); // always close the ResultSet
+                } else {
+                    console.log(row);
+                    TableInterface.fetchOneRowFromRS(connection, resultSet);
+                }
+            }
+        );
+    }
+
+    static doRelease(connection) {
+        connection.close(
+            function (err) {
+                if (err) {
+                    console.error(err.message);
+                }
+            }
+        );
+    }
+
+    static doClose(connection, resultSet) {
+        resultSet.close(
+            function (err) {
+                if (err) {
+                    console.error(err.message);
+                }
+                TableInterface.doRelease(connection);
+            }
+        );
+    }
+
+}
 
 module.exports = TableInterface;

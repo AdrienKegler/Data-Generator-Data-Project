@@ -1,10 +1,9 @@
-
 const ColorList = require('./ColorList');
 const TableInterface = require('./TableInterface');
 
 
-const bddInterface = new TableInterface();
+console.log(TableInterface.fetchWholeTable('ColorList'));
 
+TableInterface.updateRow(new ColorList('blue', 11));
 
-
-bddInterface.insertRow(new ColorList('green'));
+console.log(TableInterface.fetchWholeTable('ColorList'));
