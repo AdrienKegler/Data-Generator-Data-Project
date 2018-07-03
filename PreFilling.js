@@ -1,8 +1,7 @@
 const ColorList = require('./ColorList');
-const TableInterface = require('./TableInterface');
-// importer CandyList (puis les autres)
+const TableInterface = require('./QueryMaker');
 
-class PreFilling {
+class QueryMaker {
 
     constructor(){}
 
@@ -40,4 +39,4 @@ class PreFilling {
 
 }
 
-module.exports = PreFilling;
+module.exports = QueryMaker;

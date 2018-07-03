@@ -1,12 +1,18 @@
+const db = require('./db');
 const ColorList = require('./ColorList');
-const TableInterface = require('./TableInterface');
-const 
+const QueryMaker = require('./QueryMaker');
+const PreFilling = require('./PreFilling');
 
 
+var fakeDataSet = {tableName : "", dataSet: Object()};
 
+(async () => {
 
-let tmp = TableInterface.fetchWholeTable('ColorList');
+    await connect();
 
-tmp.then(function (result) {
-   console.log(result);
-});
+    // QueryMaker.fetchWholeTable('ColorList');
+
+    console.log( await execute("SELECT * FROM ColorList"));
+
+})();
+
