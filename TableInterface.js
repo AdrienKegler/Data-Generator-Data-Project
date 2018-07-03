@@ -10,11 +10,12 @@ const oracledb = require('oracledb');
 class TableInterface {
 
     constructor() {
+        this.arrayDataSet = []
     };
 
 
     static fetchWholeTable(tableName) {
-        let arrayDataSet = null;
+        this.arrayDataSet = [];
         let query = "SELECT * FROM " + tableName;
 
         oracledb.getConnection(
@@ -28,14 +29,13 @@ class TableInterface {
                         if (err) {
                             console.error(err.message);
                             doRelease(connection);
-                            return;
+                            return err;
                         }
-                        TableInterface.fetchOneRowFromRS(connection, result.resultSet);
+                        return TableInterface.fetchRowsFromRS(connection, result.resultSet);
                     }
                 )
             }
         );
-        return arrayDataSet;
     }
 
     static insertRow(row) {
@@ -80,7 +80,6 @@ class TableInterface {
                     [],
                     {autoCommit: true},
                     function (err, result) {
-                        console.log(result.rows);
                     });
             }
         );
@@ -99,7 +98,6 @@ class TableInterface {
                 query = query + " " + index + " = '" + attr + "',";
             } else {
                 idFieldName = index;
-                console.log(index);
             }
         }
 
@@ -114,24 +112,25 @@ class TableInterface {
                     query,
                     [],
                     {autoCommit: true},
-                    function (err, result) {
-                        console.log(result);
-                    });
+                    function (err, result) {}
+                );
             }
         );
     }
 
-    static fetchOneRowFromRS(connection, resultSet) {
+    static fetchRowsFromRS(connection, resultSet) {
         resultSet.getRow( // get one row
             function (err, row) {
+                let toReturn = [];
                 if (err) {
                     console.error(err.message);
                     TableInterface.doClose(connection, resultSet); // always close the ResultSet
+                    return err;
                 } else if (!row) { // no rows, or no more rows
                     TableInterface.doClose(connection, resultSet); // always close the ResultSet
+                    return null;
                 } else {
-                    console.log(row);
-                    TableInterface.fetchOneRowFromRS(connection, resultSet);
+                    return row;
                 }
             }
         );

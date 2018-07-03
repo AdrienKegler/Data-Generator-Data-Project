@@ -1,9 +1,12 @@
 const ColorList = require('./ColorList');
 const TableInterface = require('./TableInterface');
+const 
 
 
-console.log(TableInterface.fetchWholeTable('ColorList'));
 
-TableInterface.updateRow(new ColorList('blue', 11));
 
-console.log(TableInterface.fetchWholeTable('ColorList'));
+let tmp = TableInterface.fetchWholeTable('ColorList');
+
+tmp.then(function (result) {
+   console.log(result);
+});
