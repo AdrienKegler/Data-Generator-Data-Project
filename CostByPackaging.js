@@ -1,10 +1,9 @@
 class CostByPackaging {
-    constructor(costByPackagingCost, candyID, costByPackagingID = null){
+    constructor(candyID, PackagingID, costByPackagingCost, costByPackagingID = null){
 
         this.costByPackagingCost = costByPackagingCost;
-
-      
-            this.candyID = candyID;
+        this.PackagingID = PackagingID;
+        this.candyID = candyID;
        
 
         if(costByPackagingID!= null){

@@ -1,5 +1,5 @@
 class Packaging {
-    constructor(packagingName, packagingMaxInBox,packagingCandyCapacity,packagingID = null){
+    constructor(packagingName, packagingMaxInBox, packagingCandyCapacity,packagingID = null){
 
         this.packagingName= packagingName;
         this.packagingMaxInBox = packagingMaxInBox;

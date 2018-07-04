@@ -1,3 +1,6 @@
+const fs = require('fs');
+
+
 class QueryMaker {
 
     constructor() {
@@ -6,7 +9,11 @@ class QueryMaker {
 
 
     static fetchWholeTable(tableName) {
-        return "SELECT * FROM " + tableName;
+        let query =  "SELECT * FROM " + tableName;
+
+        QueryMaker.addToFile(query);
+
+        return query;
     }
 
     static insertRow(row) {
@@ -40,6 +47,9 @@ class QueryMaker {
         }
 
         query = query.slice(0, -2) + ")";
+
+        QueryMaker.addToFile(query);
+
         return query;
     }
 
@@ -61,8 +71,18 @@ class QueryMaker {
 
         query = query.slice(0, -1) + " WHERE " + idFieldName + " = " + row[idFieldName];
 
+        QueryMaker.addToFile(query);
+
         return query;
     }
+
+
+    static addToFile(string){
+        fs.appendFile('dynamic.sql', string, function (err) {
+            if (err) throw err;
+        });
+    }
+
 }
 
 module.exports = QueryMaker;

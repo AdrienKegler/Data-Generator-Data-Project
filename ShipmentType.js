@@ -1,5 +1,5 @@
 class ShipmentType {
-    constructor(shipmentTypeAvailable, countryID, transportTypeID, shipmentTypeID = null){
+    constructor(countryID, transportTypeID, shipmentTypeAvailable, shipmentTypeID = null){
 
         this.shipmentTypeAvailable = shipmentTypeAvailable;
         this.countryID = countryID;

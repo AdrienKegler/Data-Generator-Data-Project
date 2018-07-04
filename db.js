@@ -6,13 +6,13 @@ const CONNECTION = "192.168.56.11/orcl";
 
 let currentConnection = null;
 
-function requireConnection() {
+async function requireConnection() {
     if (!currentConnection) {
-        throw new Error("DB connection not initialized")
+        await connect();
     }
 }
 
-function connect() {
+async function connect() {
     return new Promise((resolve, reject) => {
         return oracle.getConnection({
             user: USER,
@@ -28,7 +28,7 @@ function connect() {
     })
 }
 
-function disconnect() {
+async function disconnect() {
     return new Promise((resolve, reject) => {
         currentConnection.close((err) => {
             if (err) {
@@ -48,16 +48,25 @@ async function rollback() {
     await execute("ROLLBACK");
 }
 
-function execute(query, ...values) {
+async function execute(query, ...values) {
+    if(typeof values[0] === typeof []){
+        values = values[0];
+    }
     return new Promise((resolve, reject) => {
-        requireConnection();
-        return currentConnection.execute(query, values, {}, (err, result) => {
-            commit();
-            if (err) {
-                return reject(err);
-            }
-            return resolve(result);
-        })
+        try {
+            requireConnection();
+            console.log(query);
+            return currentConnection.execute(query, values, {}, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                return resolve(result);
+            })
+        } catch (e) {
+            return reject(e);
+        }
+
     })
 }
 
@@ -66,7 +75,20 @@ async function getRandomFromTable(table, count) {
     return await execute("SELECT * FROM (SELECT * FROM " + table + " ORDER BY DBMS_RANDOM.VALUE) WHERE rownum<:num", count);
 }
 
+async function mapQuery(query, ...values) {
+
+    let result = await execute(query, ...values);
+    let columns = result.metaData.map((el) => el.name.toLowerCase());
+    return result.rows.map((el) => {
+        return el.reduce((acc, elem, i) => {
+            acc[columns[i]] = elem;
+            return acc
+        }, {})
+    })
+}
+
 module.exports = {
+    mapQuery,
     connect,
     disconnect,
     execute,

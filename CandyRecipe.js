@@ -1,5 +1,5 @@
 class CandyRecipe {
-    constructor(candyRecipeQuantity, candyID, ingredientID, candyRecipeID = null){
+    constructor(candyID, ingredientID, candyRecipeQuantity, candyRecipeID = null){
     	
         this.candyRecipeQuantity = candyRecipeQuantity;
         this.ingredientID = ingredientID;

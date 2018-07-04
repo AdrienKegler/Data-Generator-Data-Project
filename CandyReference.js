@@ -1,11 +1,11 @@
 class CandyReference {
-    constructor(packagingID, candyReferenceID_candycombo,candyReferenceID = null){
+    constructor(packagingID, candycomboID, candyReferenceID = null){
 
         this.packagingID = packagingID;
-        this.candyReferenceID_candycombo = candyReferenceID_candycombo;
+        this.candycomboID = candycomboID;
 
-        if(candyreferenceID!= null){
-            this.candyreferenceID = candyreferenceID;
+        if(candyReferenceID!= null){
+            this.candyReferenceID = candyReferenceID;
         }
     }
 }

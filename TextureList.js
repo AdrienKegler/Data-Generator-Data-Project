@@ -3,11 +3,9 @@ class TextureList {
 
         this.textureName = textureName;
 
-        if(textureID!= null){
+        if(textureID != null){
             this.textureID = textureID;
         }
-
-
     }
 }
 
