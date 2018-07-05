@@ -31,15 +31,24 @@ const db = require('./db');
 
     var referenceList = await ddg.generateEightyTwenty();
 
-    for (let ordernb = 0; ordernb < 1000; ordernb++) {
+    for (let ordernb = 0; ordernb < 1; ordernb++) {
+        let orderId = null;
         try {
-            await ddg.createOrder(referenceList);
+            orderId = await ddg.createOrder(referenceList);
         }
         catch (e) {
             console.log("An order hasn't been received");
+            console.log(e);
+        }
+        if(orderId !== null){
+            await db.connect();
+            try{
+                await ddg.processOrder(orderId);
+            }catch (e) {
+                console.log("We haven't been able to execute the order " + orderId);
+                console.log(e);
+            }
         }
     }
-
-    await db.disconnect();
 })();
 

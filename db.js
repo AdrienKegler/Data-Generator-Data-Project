@@ -52,10 +52,10 @@ async function execute(query, ...values) {
     if(typeof values[0] === typeof []){
         values = values[0];
     }
+    console.log(query);
     return new Promise((resolve, reject) => {
         try {
             requireConnection();
-            console.log(query);
             return currentConnection.execute(query, values, {}, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -76,7 +76,6 @@ async function getRandomFromTable(table, count) {
 }
 
 async function mapQuery(query, ...values) {
-
     let result = await execute(query, ...values);
     let columns = result.metaData.map((el) => el.name.toLowerCase());
     return result.rows.map((el) => {
