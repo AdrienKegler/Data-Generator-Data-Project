@@ -109,7 +109,7 @@ class DynamicDataGenerator {
             ref = DynamicDataGenerator.selectRandomFromArray(referenceList.twenty);
         }
 
-        let qty = Math.floor(DynamicDataGenerator.limit(DynamicDataGenerator.gaussRand() * 10000, 260000));
+        let qty = Math.abs(Math.floor(DynamicDataGenerator.limit(DynamicDataGenerator.gaussRand() * 10000, 260000)));
 
         if (qty === 0) {
             return null;
@@ -219,8 +219,7 @@ class DynamicDataGenerator {
 
         let packageQty = Math.floor(lotQuantity / qtyPerPackaging);
 
-
-        let delayBetweenPackaging = 1 / packager.packagingmachinecadency * 60 * 1000;
+        let delayBetweenPackaging = 1 / packager.packagingmachinecandency * 60 * 1000;
 
         let shipmentType = await db.mapQuery("SELECT * FROM SHIPMENTTYPE " +
             "WHERE SHIPMENTTYPEAVAILABLE = 1 AND COUNTRYID =  '" + order.countryid + "'");
@@ -245,9 +244,8 @@ class DynamicDataGenerator {
         let palletCount = 1;
         let palletSize = transportType.transporttypepalletsize;
 
-        console.log(lot);
-
         let currentTime = lot.candylotcreation;
+
 
         await DynamicDataGenerator.createShipping(shippingId, new Date(currentTime), shipmentTypeId);
         await DynamicDataGenerator.createPallet(palletId, new Date(currentTime), shippingId, order.clientorderid);
@@ -261,7 +259,7 @@ class DynamicDataGenerator {
                     palletId = DynamicDataGenerator.getTimeBasedId();
                     palletCount++;
                     if (palletCount > shippingSize) {
-                        hippingId = DynamicDataGenerator.getTimeBasedId();
+                        shippingId = DynamicDataGenerator.getTimeBasedId();
 
                         await DynamicDataGenerator.createShipping(shippingId, new Date(currentTime), shipmentTypeId);
                         palletCount = 1;
@@ -279,18 +277,17 @@ class DynamicDataGenerator {
             await db.execute("INSERT INTO ARTICLE (ARTICLECREATION, ARTICLEBOXING, CANDYLOTID, CANDYREFERENCEID, PACKAGINGMACHINEID, EMPLOYEEID, CARDBOARDBOXID) " +
                 "VALUES ( :time, :boxtime, " + lotId + ", " + candyReferenceId + ", " + packager.packagingmachineid + ", " + employeeid + ", " + cardBoxId + ")",
                 {
-                    time: new Date(lot.candylotcreation),
-                    boxtime: new Date()
+                    time: lot.candylotcreation,
+                    boxtime: currentTime
                 }
             );
             await db.commit();
             cardBoxFilling++;
-
-            currentTime = new Date(lot.candylotcreation.getTime() + b * delayBetweenPackaging);
+            currentTime = new Date(currentTime.getTime() + b * delayBetweenPackaging);
         }
 
 
-        await db.execute("INSERT INTO PACKAGINGMACHINEMAINTENANCE (PACKAGINMACHINEMAINTENANCETIME, PACKAGINGMACHINEID) " +
+        await db.execute("INSERT INTO PACKAGINGMACHINEMAINTENANCE (PACKAGINGMACHINEMAINTENANCETIME, PACKAGINGMACHINEID) " +
             "VALUES (:time, " + packager.packagingmachineid + ")",
             {time: new Date(currentTime)});
         db.commit();
@@ -371,9 +368,17 @@ class DynamicDataGenerator {
                 "  LEFT JOIN MANUFACTURINGMACHINECONFIG M2 on M.MANUFACTURINGMACHINECONFIGID = M2.MANUFACTURINGMACHINECONFIGID\n" +
                 "WHERE M.MANUFACTURINGMACHINEID = " + machine + "\n" +
                 "ORDER BY (M3.MANUFACTURINGMACHINEMAINTENANCETIME + M2.MANUFACTURINGMACHINECONFIGDELAY) DESC\n");
-            if (localAvailibilityTime != null && localAvailibilityTime.getTime() < SoonestAvailibility) {
-                SoonestAvailibility = localAvailibilityTime.getTime();
-                wantedMachine = machine.manufacturingmachineid;
+
+
+            if(localAvailibilityTime.length > 0){
+                localAvailibilityTime = localAvailibilityTime[0].manufacturingmachinemaintenancetime;
+                if (localAvailibilityTime != null && localAvailibilityTime.getTime() < SoonestAvailibility) {
+                    SoonestAvailibility = localAvailibilityTime.getTime();
+                    wantedMachine = machine.manufacturingmachineid;
+                }
+            }
+            else {
+                return machine.manufacturingmachineid;
             }
         });
 
